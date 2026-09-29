@@ -1,0 +1,6 @@
+==10508== Memcheck, a memory error detector
+==10508== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==10508== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==10508== Command: ./swish
+==10508== Parent PID: 10344
+==10508== 

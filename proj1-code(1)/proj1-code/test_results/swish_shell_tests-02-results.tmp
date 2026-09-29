@@ -1,0 +1,39 @@
+==============================================================================================
+== Test 2: Print Current Working Directory
+== Starts up a swish shell and prints the current working directory.
+Running test...
+Expected output is in file 'test_results/raw/swish_shell_tests-02-expected.tmp'
+Actual output is in file 'test_results/raw/swish_shell_tests-02-actual.tmp'
+Error: VALGRIND CHECK FAILED. Output:
+@> pwd
+/workspaces/csci4061-fa26/proj1-code(1)/proj1-code
+@> exit
+
+
+== Valgrind Results (from 'test_results/swish_shell_tests-02-valgrd.tmp')
+==10370== Memcheck, a memory error detector
+==10370== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==10370== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==10370== Command: ./swish
+==10370== Parent PID: 10344
+==10370== 
+==10370== 
+==10370== HEAP SUMMARY:
+==10370==     in use at exit: 51 bytes in 1 blocks
+==10370==   total heap usage: 7 allocs, 6 frees, 2,172 bytes allocated
+==10370== 
+==10370== 51 bytes in 1 blocks are definitely lost in loss record 1 of 1
+==10370==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10370==    by 0x490754E: strdup (strdup.c:42)
+==10370==    by 0x4974BA8: get_current_dir_name (getdirname.c:40)
+==10370==    by 0x109578: main (swish.c:62)
+==10370== 
+==10370== LEAK SUMMARY:
+==10370==    definitely lost: 51 bytes in 1 blocks
+==10370==    indirectly lost: 0 bytes in 0 blocks
+==10370==      possibly lost: 0 bytes in 0 blocks
+==10370==    still reachable: 0 bytes in 0 blocks
+==10370==         suppressed: 0 bytes in 0 blocks
+==10370== 
+==10370== For lists of detected and suppressed errors, rerun with: -s
+==10370== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)

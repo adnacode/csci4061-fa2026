@@ -1,0 +1,3 @@
+@> echo foo > out.txt
+@> cat out.txt
+@> cd test_cases/resources

@@ -1,0 +1,44 @@
+==============================================================================================
+== Test 5: Change to Non-Existent Directory
+== Attempts to change to a non-existent directory. Shell should print out an
+== appropriate error message.
+Running test...
+Expected output is in file 'test_results/raw/swish_shell_tests-05-expected.tmp'
+Actual output is in file 'test_results/raw/swish_shell_tests-05-actual.tmp'
+Error: VALGRIND CHECK FAILED. Output:
+@> cd this_directory_does_not_exist
+
+
+== Valgrind Results (from 'test_results/swish_shell_tests-05-valgrd.tmp')
+==10405== Memcheck, a memory error detector
+==10405== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==10405== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==10405== Command: ./swish
+==10405== Parent PID: 10344
+==10405== 
+==10405== 
+==10405== HEAP SUMMARY:
+==10405==     in use at exit: 97 bytes in 6 blocks
+==10405==   total heap usage: 9 allocs, 3 frees, 2,177 bytes allocated
+==10405== 
+==10405== 33 bytes in 5 blocks are indirectly lost in loss record 1 of 2
+==10405==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10405==    by 0x109A7B: strvec_add (string_vector.c:54)
+==10405==    by 0x10A062: tokenize (swish_funcs.c:34)
+==10405==    by 0x1094D3: main (swish.c:47)
+==10405== 
+==10405== 97 (64 direct, 33 indirect) bytes in 1 blocks are definitely lost in loss record 2 of 2
+==10405==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10405==    by 0x109A19: strvec_add (string_vector.c:45)
+==10405==    by 0x10A062: tokenize (swish_funcs.c:34)
+==10405==    by 0x1094D3: main (swish.c:47)
+==10405== 
+==10405== LEAK SUMMARY:
+==10405==    definitely lost: 64 bytes in 1 blocks
+==10405==    indirectly lost: 33 bytes in 5 blocks
+==10405==      possibly lost: 0 bytes in 0 blocks
+==10405==    still reachable: 0 bytes in 0 blocks
+==10405==         suppressed: 0 bytes in 0 blocks
+==10405== 
+==10405== For lists of detected and suppressed errors, rerun with: -s
+==10405== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
