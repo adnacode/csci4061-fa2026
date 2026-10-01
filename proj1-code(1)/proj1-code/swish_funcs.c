@@ -57,9 +57,87 @@ int run_command(strvec_t *tokens)
     {
         args[i] = NULL;
     }
+    int arg_index = 0;
     for (int i = 0; i < tokens->length; i++)
     {
-        args[i] = strvec_get(tokens, i);
+        char *token = strvec_get(tokens, i);
+
+        if (strcmp(token, "<") == 0)
+        {
+            char *filename = strvec_get(tokens, i + 1);
+
+            int fd = open(filename, O_RDONLY);
+
+            if (fd == -1)
+            {
+                perror("Failed to open input file");
+                return -1;
+            }
+
+            if (dup2(fd, STDIN_FILENO) == -1)
+            {
+                perror("dup2");
+                close(fd);
+                return -1;
+            }
+            if (close(fd) == -1)
+            {
+                perror("close");
+                return -1;
+            }
+            i++; // for skipping the next tokenvector/filename in the next iteration
+        }
+        else if (strcmp(token, ">") == 0)
+        {
+            char *filename = strvec_get(tokens, i + 1);
+
+            int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+            if (fd == -1)
+            {
+                perror("Failed to open output file");
+                return -1;
+            }
+            if (dup2(fd, STDOUT_FILENO) == -1)
+            {
+                perror("dup2");
+                close(fd);
+                return -1;
+            }
+            if (close(fd) == -1)
+            {
+                perror("close");
+                return -1;
+            }
+            i++; // for skipping the next tokenvector/filename in the next iteration
+        }
+        else if (strcmp(token, ">>") == 0)
+        {
+            char *filename = strvec_get(tokens, i + 1);
+
+            int fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+            if (fd == -1)
+            {
+                perror("Failed to open input file");
+                return -1;
+            }
+            if (dup2(fd, STDOUT_FILENO) == -1)
+            {
+                perror("dup2");
+                close(fd);
+                return -1;
+            }
+            if (close(fd) == -1)
+            {
+                perror("close");
+                return -1;
+            }
+            i++; // for skipping the next tokenvector/filename in the next iteration
+        }
+        else
+        {
+            args[arg_index] = token;
+            arg_index++;
+        }
     }
 
     execvp(args[0], args);
