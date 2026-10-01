@@ -187,7 +187,22 @@ int main(int argc, char **argv)
             {
                 // parent
                 int status;
+                // Gives conntrol to cpgrp
+                if (tcsetpgrp(STDIN_FILENO, pid) == -1)
+                {
+                    perror("tcsetpgrp");
+                    return 1;
+                }
                 waitpid(pid, &status, WUNTRACED);
+
+                pid_t shell_pid = getpid();
+
+                // Give control back to swish
+                if (tcsetpgrp(STDIN_FILENO, shell_pid) == -1)
+                {
+                    perror("tcsetpgrp");
+                    return 1;
+                }
             }
             else
             {

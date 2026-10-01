@@ -94,7 +94,7 @@ int run_command(strvec_t *tokens)
             int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
             if (fd == -1)
             {
-                perror("Failed to open output file");
+                perror("Failed to open input file");
                 return -1;
             }
             if (dup2(fd, STDOUT_FILENO) == -1)
@@ -117,7 +117,7 @@ int run_command(strvec_t *tokens)
             int fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
             if (fd == -1)
             {
-                perror("Failed to open input file");
+                perror("Failed to open output file");
                 return -1;
             }
             if (dup2(fd, STDOUT_FILENO) == -1)
@@ -139,7 +139,33 @@ int run_command(strvec_t *tokens)
             arg_index++;
         }
     }
+    // Task4
+    struct sigaction sa;
+    sa.sa_handler = SIG_DFL;
 
+    if (sigfillset(&sa.sa_mask) == -1)
+    {
+        perror("sigfillset");
+        return -1;
+    }
+
+    sa.sa_flags = 0;
+
+    // restore the signal handlers to their def values
+    if (sigaction(SIGTTIN, &sa, NULL) == -1 || sigaction(SIGTTOU, &sa, NULL) == -1)
+    {
+        perror("sigaction");
+        return -1;
+    }
+
+    // puts child into their own pgrps
+    pid_t pid = getpid();
+
+    if (setpgid(pid, pid) == -1)
+    {
+        perror("setpgid");
+        return -1;
+    }
     execvp(args[0], args);
     perror("exec");
     return -1;
