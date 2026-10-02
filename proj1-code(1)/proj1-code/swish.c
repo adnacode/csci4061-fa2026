@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     printf("%s", PROMPT);
     while (fgets(cmd, CMD_LEN, stdin) != NULL)
     {
-        // Need to remove trailing '\n' from cmd. There are fancier ways.
+        // Need to remove trailing '\n' from cmd. There are fancier ways..
         int i = 0;
         while (cmd[i] != '\n' && cmd[i] != '\0')
         {
@@ -166,6 +166,18 @@ int main(int argc, char **argv)
 
         else
         {
+            // TODO Task 6: If the last token input by the user is "&", start the current
+            // command in the background.
+            int is_background = 0;
+            int last = tokens.length - 1;
+            // 1. Determine if the last token is "&". If present, use strvec_take() to remove
+            //    the "&" from the token list.
+            if (strcmp(strvec_get(&tokens, last), "&") == 0)
+            {
+                is_background = 1;
+                strvec_take(&tokens, last);
+            }
+
             // TODO Task 2: If the user input does not match any built-in shell command,
             // treat the input as a program name and command-line arguments
             // USE THE run_command() FUNCTION DEFINED IN swish_funcs.c IN YOUR IMPLEMENTATION
@@ -185,23 +197,43 @@ int main(int argc, char **argv)
             }
             else if (pid > 0)
             {
-                // parent
-                int status;
-                // Gives conntrol to cpgrp
-                if (tcsetpgrp(STDIN_FILENO, pid) == -1)
+                // 2. Modify the code for the parent (shell) process: Don't use tcsetpgrp() or
+                //    use waitpid() to interact with the newly spawned child process.
+                if (is_background)
                 {
-                    perror("tcsetpgrp");
-                    return 1;
+                    job_list_add(&jobs, pid, strvec_get(&tokens, 0), BACKGROUND);
                 }
-                waitpid(pid, &status, WUNTRACED);
-
-                pid_t shell_pid = getpid();
-
-                // Give control back to swish
-                if (tcsetpgrp(STDIN_FILENO, shell_pid) == -1)
+                else
                 {
-                    perror("tcsetpgrp");
-                    return 1;
+                    // parent
+                    int status;
+                    // Gives conntrol to cpgrp
+                    if (tcsetpgrp(STDIN_FILENO, pid) == -1)
+                    {
+                        perror("tcsetpgrp");
+                        return 1;
+                    }
+                    if (waitpid(pid, &status, WUNTRACED) == -1)
+                    {
+                        perror("tcsetpgrp");
+                        return -1;
+                    }
+
+                    pid_t shell_pid = getpid();
+
+                    // Give control back to swish
+                    if (tcsetpgrp(STDIN_FILENO, shell_pid) == -1)
+                    {
+                        perror("tcsetpgrp");
+                        return 1;
+                    }
+
+                    // 3. If the child status was stopped by a signal, add it to 'jobs', the
+                    //    the terminal's jobs list.
+                    if (WIFSTOPPED(status))
+                    {
+                        job_list_add(&jobs, pid, strvec_get(&tokens, 0), STOPPED);
+                    }
                 }
             }
             else
@@ -222,17 +254,10 @@ int main(int argc, char **argv)
             //    use WUNTRACED as your third argument to detect if it has stopped from a signal
             // 2. After waitpid() has returned, call tcsetpgrp(STDIN_FILENO, <pid>) where pid is
             //    the process ID of the shell process (use getpid() to obtain it)
-            // 3. If the child status was stopped by a signal, add it to 'jobs', the
-            //    the terminal's jobs list.
+
             // You can detect if this has occurred using WIFSTOPPED on the status
             // variable set by waitpid()
 
-            // TODO Task 6: If the last token input by the user is "&", start the current
-            // command in the background.
-            // 1. Determine if the last token is "&". If present, use strvec_take() to remove
-            //    the "&" from the token list.
-            // 2. Modify the code for the parent (shell) process: Don't use tcsetpgrp() or
-            //    use waitpid() to interact with the newly spawned child process.
             // 3. Add a new entry to the jobs list with the child's pid, program name,
             //    and status BACKGROUND.
         }

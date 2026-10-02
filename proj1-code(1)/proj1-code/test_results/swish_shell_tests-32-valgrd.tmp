@@ -1,0 +1,15 @@
+==8545== Memcheck, a memory error detector
+==8545== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==8545== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==8545== Command: ./swish
+==8545== Parent PID: 8108
+==8545== 
+==8545== 
+==8545== HEAP SUMMARY:
+==8545==     in use at exit: 0 bytes in 0 blocks
+==8545==   total heap usage: 16 allocs, 16 frees, 2,279 bytes allocated
+==8545== 
+==8545== All heap blocks were freed -- no leaks are possible
+==8545== 
+==8545== For lists of detected and suppressed errors, rerun with: -s
+==8545== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

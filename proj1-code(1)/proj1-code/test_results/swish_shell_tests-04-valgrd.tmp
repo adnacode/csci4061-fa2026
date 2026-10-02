@@ -1,39 +1,15 @@
-==10398== Memcheck, a memory error detector
-==10398== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==10398== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==10398== Command: ./swish
-==10398== Parent PID: 10344
-==10398== 
-==10398== 
-==10398== HEAP SUMMARY:
-==10398==     in use at exit: 92 bytes in 4 blocks
-==10398==   total heap usage: 8 allocs, 4 frees, 2,176 bytes allocated
-==10398== 
-==10398== 9 bytes in 2 blocks are indirectly lost in loss record 1 of 3
-==10398==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10398==    by 0x109A7B: strvec_add (string_vector.c:54)
-==10398==    by 0x10A062: tokenize (swish_funcs.c:34)
-==10398==    by 0x1094D3: main (swish.c:47)
-==10398== 
-==10398== 41 (32 direct, 9 indirect) bytes in 1 blocks are definitely lost in loss record 2 of 3
-==10398==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10398==    by 0x109904: strvec_init (string_vector.c:14)
-==10398==    by 0x1099D4: strvec_add (string_vector.c:38)
-==10398==    by 0x10A062: tokenize (swish_funcs.c:34)
-==10398==    by 0x1094D3: main (swish.c:47)
-==10398== 
-==10398== 51 bytes in 1 blocks are definitely lost in loss record 3 of 3
-==10398==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10398==    by 0x490754E: strdup (strdup.c:42)
-==10398==    by 0x4974BA8: get_current_dir_name (getdirname.c:40)
-==10398==    by 0x109578: main (swish.c:62)
-==10398== 
-==10398== LEAK SUMMARY:
-==10398==    definitely lost: 83 bytes in 2 blocks
-==10398==    indirectly lost: 9 bytes in 2 blocks
-==10398==      possibly lost: 0 bytes in 0 blocks
-==10398==    still reachable: 0 bytes in 0 blocks
-==10398==         suppressed: 0 bytes in 0 blocks
-==10398== 
-==10398== For lists of detected and suppressed errors, rerun with: -s
-==10398== ERROR SUMMARY: 3 errors from 3 contexts (suppressed: 0 from 0)
+==8151== Memcheck, a memory error detector
+==8151== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==8151== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==8151== Command: ./swish
+==8151== Parent PID: 8108
+==8151== 
+==8151== 
+==8151== HEAP SUMMARY:
+==8151==     in use at exit: 0 bytes in 0 blocks
+==8151==   total heap usage: 11 allocs, 11 frees, 2,198 bytes allocated
+==8151== 
+==8151== All heap blocks were freed -- no leaks are possible
+==8151== 
+==8151== For lists of detected and suppressed errors, rerun with: -s
+==8151== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

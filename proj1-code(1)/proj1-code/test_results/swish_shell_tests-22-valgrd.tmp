@@ -1,0 +1,15 @@
+==8323== Memcheck, a memory error detector
+==8323== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==8323== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==8323== Command: ./swish
+==8323== Parent PID: 8108
+==8323== 
+==8323== 
+==8323== HEAP SUMMARY:
+==8323==     in use at exit: 0 bytes in 0 blocks
+==8323==   total heap usage: 35 allocs, 35 frees, 2,671 bytes allocated
+==8323== 
+==8323== All heap blocks were freed -- no leaks are possible
+==8323== 
+==8323== For lists of detected and suppressed errors, rerun with: -s
+==8323== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

@@ -1,0 +1,5 @@
+@> wc
+@> jobs
+0: wc (stopped)
+@> wait-for 0
+Job index is for stopped stopped process not background process!

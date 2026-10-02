@@ -194,20 +194,69 @@ int resume_job(strvec_t *tokens, job_list_t *jobs, int is_foreground)
     // TODO Task 5: Implement the ability to resume stopped jobs in the foreground
     // 1. Look up the relevant job information (in a job_t) from the jobs list
     //    using the index supplied by the user (in tokens index 1)
+    const char *index_str = strvec_get(tokens, 1);
     //    Feel free to use sscanf() or atoi() to convert this string to an int
+    int index_num = atoi(index_str);
     // 2. Call tcsetpgrp(STDIN_FILENO, <job_pid>) where job_pid is the job's process ID
+    job_t *job = job_list_get(jobs, index_num);
+    if (job == NULL)
+    {
+        fprintf(stderr, "Job index out of bounds!\n");
+        return -1;
+    }
     // 3. Send the process the SIGCONT signal with the kill() system call
     // 4. Use the same waitpid() logic as in main -- don't forget WUNTRACED
     // 5. If the job has terminated (not stopped), remove it from the 'jobs' list
     // 6. Call tcsetpgrp(STDIN_FILENO, <shell_pid>). shell_pid is the *current*
     //    process's pid, since we call this function from the main shell process
+    if (is_foreground)
+    {
+        // handling
+        if (tcsetpgrp(STDIN_FILENO, job->pid) == -1)
+        {
+            perror("tcsetpgrp");
+            return -1;
+        }
 
-    // TODO Task 6: Implement the ability to resume stopped jobs in the background.
-    // This really just means omitting some of the steps used to resume a job in the foreground:
-    // 1. DO NOT call tcsetpgrp() to manipulate foreground/background terminal process group
-    // 2. DO NOT call waitpid() to wait on the job
-    // 3. Make sure to modify the 'status' field of the relevant job list entry to BACKGROUND
-    //    (as it was STOPPED before this)
+        if (kill(job->pid, SIGCONT) == -1)
+        {
+            perror("kill");
+            return -1;
+        }
+
+        int status;
+        if (waitpid(job->pid, &status, WUNTRACED) == -1)
+        {
+            perror("waitpid");
+        }
+
+        // if terminated, remove
+        if (!WIFSTOPPED(status))
+        {
+            job_list_remove(jobs, index_num);
+        }
+
+        if (tcsetpgrp(STDIN_FILENO, getpid()) == -1)
+        {
+            perror("tcsetpgrp");
+            return -1;
+        }
+    }
+    else
+    {
+        // TODO Task 6: Implement the ability to resume stopped jobs in the background.
+        // This really just means omitting some of the steps used to resume a job in the foreground:
+        // 1. DO NOT call tcsetpgrp() to manipulate foreground/background terminal process group
+        // 2. DO NOT call waitpid() to wait on the job
+        // 3. Make sure to modify the 'status' field of the relevant job list entry to BACKGROUND
+        //    (as it was STOPPED before this)
+        if (kill(job->pid, SIGCONT) == -1)
+        {
+            perror("kill");
+            return -1;
+        }
+        job->status = BACKGROUND;
+    }
 
     return 0;
 }
@@ -217,23 +266,65 @@ int await_background_job(strvec_t *tokens, job_list_t *jobs)
     // TODO Task 6: Wait for a specific job to stop or terminate
     // 1. Look up the relevant job information (in a job_t) from the jobs list
     //    using the index supplied by the user (in tokens index 1)
+    const char *index_str = strvec_get(tokens, 1);
+    int index_num = atoi(index_str);
+    job_t *job = job_list_get(jobs, index_num);
+    if (job == NULL)
+    {
+        fprintf(stderr, "Job index out of bounds!\n");
+        return -1;
+    }
     // 2. Make sure the job's status is BACKGROUND (no sense waiting for a stopped job)
+    int status;
+    if (job->status != BACKGROUND)
+    {
+        fprintf(stderr, "Job index is for stopped stopped process not background process!\n");
+    }
     // 3. Use waitpid() to wait for the job to terminate, as you have in resume_job() and main().
+    if (waitpid(job->pid, &status, WUNTRACED) == -1)
+    {
+        perror("waitpid");
+        return -1;
+    }
     // 4. If the process terminates (is not stopped by a signal) remove it from the jobs list
+    if (!WIFSTOPPED(status))
+    {
+        job_list_remove(jobs, index_num);
+    }
 
     return 0;
 }
 
 int await_all_background_jobs(job_list_t *jobs)
 {
+    job_t *cur_head = jobs->head;
     // TODO Task 6: Wait for all background jobs to stop or terminate
     // 1. Iterate through the jobs list, ignoring any stopped jobs
-    // 2. For a background job, call waitpid() with WUNTRACED.
-    // 3. If the job has stopped (check with WIFSTOPPED), change its
-    //    status to STOPPED. If the job has terminated, do nothing until the
-    //    next step (don't attempt to remove it while iterating through the list).
+    while (cur_head != NULL)
+    {
+        if (cur_head->status == BACKGROUND)
+        {
+            int status;
+            // 2. For a background job, call waitpid() with WUNTRACED.
+            if (waitpid(cur_head->pid, &status, WUNTRACED) == -1)
+            {
+                perror("waitpid");
+                return -1;
+            }
+            // 3. If the job has stopped (check with WIFSTOPPED), change its
+            //    status to STOPPED. If the job has terminated, do nothing until the
+            //    next step (don't attempt to remove it while iterating through the list).
+            if (WIFSTOPPED(status))
+            {
+                cur_head->status = STOPPED;
+            }
+        }
+        cur_head = cur_head->next;
+    }
+
     // 4. Remove all background jobs (which have all just terminated) from jobs list.
     //    Use the job_list_remove_by_status() function.
+    job_list_remove_by_status(jobs, BACKGROUND);
 
     return 0;
 }
