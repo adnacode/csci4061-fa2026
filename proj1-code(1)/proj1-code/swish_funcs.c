@@ -196,12 +196,18 @@ int resume_job(strvec_t *tokens, job_list_t *jobs, int is_foreground)
     //    using the index supplied by the user (in tokens index 1)
     const char *index_str = strvec_get(tokens, 1);
     //    Feel free to use sscanf() or atoi() to convert this string to an int
+    // Added a check in case of missing index, to avoid a error signal
+    if (index_str == NULL)
+    {
+        fprintf(stderr, "Missing job index\n");
+        return -1;
+    }
     int index_num = atoi(index_str);
     // 2. Call tcsetpgrp(STDIN_FILENO, <job_pid>) where job_pid is the job's process ID
     job_t *job = job_list_get(jobs, index_num);
     if (job == NULL)
     {
-        fprintf(stderr, "Job index out of bounds!\n");
+        fprintf(stderr, "Job index out of bounds\n");
         return -1;
     }
     // 3. Send the process the SIGCONT signal with the kill() system call
@@ -221,25 +227,33 @@ int resume_job(strvec_t *tokens, job_list_t *jobs, int is_foreground)
         if (kill(job->pid, SIGCONT) == -1)
         {
             perror("kill");
+
+            // if the kill fails we keep terminal control in the shell
+            if (tcsetpgrp(STDIN_FILENO, getpid()) == -1)
+            {
+                perror("tcsetpgrp");
+                return -1;
+            }
             return -1;
         }
 
         int status;
-        if (waitpid(job->pid, &status, WUNTRACED) == -1)
+        int result = waitpid(job->pid, &status, WUNTRACED); // saves the result to check for errors before using the status
+        if (tcsetpgrp(STDIN_FILENO, getpid()) == -1)        // rearranged this to give terminal control back to shell before checking for errors
         {
+            perror("tcsetpgrp");
+            return -1;
+        }
+        if (result == -1)
+        { // prevents the use of an invalid status in case the wait fails
             perror("waitpid");
+            return -1;
         }
 
         // if terminated, remove
         if (!WIFSTOPPED(status))
         {
             job_list_remove(jobs, index_num);
-        }
-
-        if (tcsetpgrp(STDIN_FILENO, getpid()) == -1)
-        {
-            perror("tcsetpgrp");
-            return -1;
         }
     }
     else
