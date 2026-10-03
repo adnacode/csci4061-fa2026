@@ -87,7 +87,10 @@ int main(int argc, char **argv)
             const char *second_token = strvec_get(&tokens, 1);
             if (second_token != NULL)
             {
-                chdir(second_token);
+                if (chdir(second_token) == -1)
+                {
+                    perror("chdir");
+                }
                 // need to write error handling - will visit TA
             }
             else
