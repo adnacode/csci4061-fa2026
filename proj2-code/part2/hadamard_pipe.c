@@ -31,9 +31,17 @@ struct element {
  */
 // TODO: Uncomment this function definition. Implement the function,
 // and call it from child processes.
-// static int worker(const int *a, const int *b, unsigned start, unsigned end, int pipe_fd) {
-//     return 0;
-// }
+static int worker(const int *a, const int *b, unsigned start, unsigned end, int pipe_fd) {
+    for (unsigned i = start; i < end; i++) {
+        struct element e;
+        e.idx = i;
+        e.value = a[i] * b[i];
+        if (write(pipe_fd, &e, sizeof(e)) != (ssize_t)sizeof(e)) {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 PyObject *hadamard_pipe(PyObject *self, PyObject *args) {
     const char *mat_a_file;
@@ -55,7 +63,7 @@ PyObject *hadamard_pipe(PyObject *self, PyObject *args) {
     unsigned b_cols;
     int *mat_b_data = read_matrix_from_file(mat_b_file, &b_rows, &b_cols, 0);
     if (mat_b_data == NULL) {
-        PyErr_SetString(PyExc_OSError, "Failed to read matrix data from file");
+        PyErr_SetString(PyExc_OSError, "Failed to read matrix data from file.");
         free(mat_a_data);
         return NULL;
     }
@@ -70,6 +78,99 @@ PyObject *hadamard_pipe(PyObject *self, PyObject *args) {
      * Collect results in the parent via the pipe
      * Don't forget cleanup and error handling!
      */
+     unsigned total = a_rows * a_cols;
+     unsigned chuck = (unsigned)ceil((double)total / n_procs);
+
+     int fds[2];
+     if (pipe(fds) == -1) {
+        PyErr_SetFromErrno(PyExc_OSError);
+        free(mat_a_data);
+        free(mat_b_data);
+        return NULL;
+     }
+
+     pid_t *pids = malloc(n_procs * sizeof(pid_t));
+     if (pids == NULL) {
+        PyErr_SetString(PyExc_OSError, "Failed to malloc");
+        close(fds[0]);
+        close(fds[1]);
+        free(mat_a_data);
+        free(mat_b_data);
+        return NULL;
+     }
+
+     unsigned n_forked = 0;
+     int fork_failed = 0;
+     for (unsigned i = 0; i < n_procs; i++) {
+        pid_t pid = fork();
+        if (pid == -1) {
+            fork_failed = 1;
+            break;
+        }
+        if (pid == 0) {
+            close(fds[0]);
+            unsigned start = min(i * chuck, total);
+            unsigned end = min(start + chuck, total);
+            int result = worker(mat_a_data, mat_b_data, start, end, fds[1]);
+            close(fds[1]);
+
+            free(mat_a_data);
+            free(mat_b_data);
+            free(pids);
+
+            _exit(result == 0 ? 0 : 1);
+        }
+        pids[i] = pid;
+        n_forked++;
+     }
+
+     close(fds[1]);
+
+     int failed = fork_failed;
+     if (fork_failed) {
+        PyErr_SetFromErrno(PyExc_OSError);
+     }
+
+     int *mat_c_data = malloc(total * sizeof(int));
+     if (mat_c_data == NULL) {
+        if (!failed) {
+            PyErr_SetString(PyExc_OSError, "Failed cause of malloc");
+        }
+        failed = 1;
+     }
+
+     if (mat_c_data != NULL) {
+        struct element e;
+        while (read(fds[0], &e, sizeof(e)) == (ssize_t)sizeof(e)) {
+            if (e.idx < total) {
+                mat_c_data[e.idx] = e.value;
+            }
+        }
+     }
+     close(fds[0]);
+
+     for (unsigned i =0; i < n_forked; i++) {
+        int status;
+        if (waitpid(pids[i], &status, 0) == -1 || !WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+            if (!failed) {
+                PyErr_SetString(PyExc_OSError, "A worker process failed");
+            }
+            failed = 1;
+        }
+     }
+
+     if (!failed) {
+        print_matrix(mat_c_data, a_rows, a_cols);
+     }
+
+     free(pids);
+     free(mat_c_data);
+     free(mat_b_data);
+     free(mat_a_data);
+
+     if (failed) {
+        return NULL;
+     }
 
     Py_RETURN_NONE;
 }

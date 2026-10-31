@@ -1,0 +1,7 @@
+=====================================================================================================================
+== Test 7: Matrix 6 -- Pipe
+== Compute hadamard product using 16 child processes and a pipe for IPC
+Running test...
+Expected output is in file 'test_results/raw/parallel_matrix_hadamard_product_tests-07-expected.tmp'
+Actual output is in file 'test_results/raw/parallel_matrix_hadamard_product_tests-07-actual.tmp'
+Test PASSED
