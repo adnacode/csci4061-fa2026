@@ -1,4 +1,4 @@
-==========================================================================================================================================================
+===========================================================================================================================
 == Test 22: Resume multiple stopped jobs in foreground
 == Run several interactive jobs, suspend them, then resume in the foreground and
 == complete them. Check output of jobs to verify.

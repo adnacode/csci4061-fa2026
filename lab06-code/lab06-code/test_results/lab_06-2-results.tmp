@@ -1,0 +1,8 @@
+=======================================================================
+== Test 2: Code - Square Root List
+== Checks to see if square roots are computed successfully for positive
+== numbers, while an error occurs if a negative number is found
+Running test...
+Expected output is in file 'test_results/raw/lab_06-2-expected.tmp'
+Actual output is in file 'test_results/raw/lab_06-2-actual.tmp'
+Test PASSED
