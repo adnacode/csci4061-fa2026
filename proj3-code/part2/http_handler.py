@@ -1,5 +1,8 @@
 import socket
+<<<<<<< HEAD
 import pathlib
+=======
+>>>>>>> 8f2d122db87202f1b8391a830119faddc479b371
 
 MIME_TYPES = {
     ".txt": "text/plain",
@@ -15,6 +18,7 @@ MIME_TYPES = {
 # 'conn': The socket to read from
 # Returns the name of the requested resource
 def read_request(conn: socket.socket) -> str:
+<<<<<<< HEAD
     reader = conn.makefile("rb")
 
     request_line = reader.readline().decode("utf-8")
@@ -32,12 +36,17 @@ def read_request(conn: socket.socket) -> str:
 
     reader.close()
     return resource
+=======
+    raise NotImplementedError("TODO: read_request")
+
+>>>>>>> 8f2d122db87202f1b8391a830119faddc479b371
 
 # Write an HTTP response to a socket
 # 'conn': The socket to write the request to
 # 'file_path': A complete path (e.g., "server_files/quote.txt") for the file to
 #   send in the response. Send a 404 response if this file does not exist.
 def write_response(conn: socket.socket, file_path: str) -> None:
+<<<<<<< HEAD
     path = pathlib.Path(file_path)
 
     if not path.is_file():
@@ -64,3 +73,6 @@ def write_response(conn: socket.socket, file_path: str) -> None:
 
     with open(file_path, "rb") as f:
         conn.sendfile(f)
+=======
+    raise NotImplementedError("TODO: write_response")
+>>>>>>> 8f2d122db87202f1b8391a830119faddc479b371

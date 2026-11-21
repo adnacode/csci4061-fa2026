@@ -1,0 +1,10 @@
+================================================================================================================
+== Test 1: Sequential Client Requests
+== Launches sequential clients (curl) to fetch files (including one non-existent
+== file) from a simple, sequential HTTP server. Checks that all requests for
+== valid files succeed and the request for the non-existent file produces a 404
+== response.
+Running test...
+Expected output is in file 'test_results/raw/project_3_part_1-1-expected.tmp'
+Actual output is in file 'test_results/raw/project_3_part_1-1-actual.tmp'
+Test PASSED
