@@ -1,0 +1,3 @@
+$ ./simple_http_client
+$ diff -q index.html test_cases/resources/index.html
+$ diff -q ocelot.jpg test_cases/resources/ocelot.jpg

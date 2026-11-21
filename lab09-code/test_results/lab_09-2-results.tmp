@@ -1,0 +1,13 @@
+===========================================================================
+== Test 2: Code - HTTP Client
+== Tests the HTTP client program by retrieving three files from an HTTP
+== server. Checks that the downloaded files match the provided reference
+== copies.
+Running test...
+Expected output is in file 'test_results/raw/lab_09-2-expected.tmp'
+Actual output is in file 'test_results/raw/lab_09-2-actual.tmp'
+Error: TIMED OUT. Output:
+$ ./simple_http_client
+$ diff -q index.html test_cases/resources/index.html
+$ diff -q ocelot.jpg test_cases/resources/ocelot.jpg
+
